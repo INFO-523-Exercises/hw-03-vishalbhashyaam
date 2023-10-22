@@ -1,0 +1,33 @@
+---
+title: "hw-03.qmd"
+author: "VISHAL BHASHYAAM"
+format: html
+editor: visual
+---
+
+# Classification: Basic Concepts and Techniques
+
+## Install packages
+
+Install the required packages used in the chapter:
+
+```{r}
+if (!require(pacman))
+  install.packages("pacman")
+
+pacman::p_load(tidyverse , rpart, plot, caret , lattice, Fselector,
+               sampling,pROC)
+
+# I am not installing ml bench because I am using different dataset which does not require mlbench.
+```
+
+## Spam E-mail Dataset
+
+I am using the spam e-mail dataset which either requires the tidytuesdayR package or we can read it directly from the github
+
+```{r}
+# Reading the dataset directly from github
+
+spam <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-08-15/spam.csv')
+
+```
