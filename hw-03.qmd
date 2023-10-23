@@ -12,10 +12,11 @@ editor: visual
 Install the required packages used in the chapter:
 
 ```{r}
+
 if (!require(pacman))
   install.packages("pacman")
 
-pacman::p_load(tidyverse , rpart, plot, caret , lattice, Fselector,
+pacman::p_load(tidyverse ,rpart, rpart.plot, caret , lattice, FSelector,
                sampling,pROC)
 
 # I am not installing ml bench because I am using different dataset which does not require mlbench.
@@ -29,5 +30,625 @@ I am using the spam e-mail dataset which either requires the tidytuesdayR packag
 # Reading the dataset directly from github
 
 spam <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-08-15/spam.csv')
+spamCsv <- spam
+```
 
+```{r}
+spamCsv |>
+  head() |>
+  formattable::formattable()
+```
+
+```{r}
+library(tidyverse)
+as_tibble(spamCsv)
+```
+
+```{r}
+spam |>
+  summary() 
+  
+```
+
+Converting yes/no values into factors(nominal), used to build models.
+
+```{r}
+spamCsv <- spamCsv |>
+  mutate(across(where(is.logical), factor, levels = c("y", "n"))) |>
+  mutate(across(where(is.character), factor))
+```
+
+```{r}
+summary(spamCsv)
+```
+
+## Decision Trees
+
+Recursive Partitioning uses the Gini index to make splitting decisions and early stopping (pre-pruning)
+
+```{r}
+library(rpart)
+```
+
+## Creating tree with default setting (uses pre-pruning)
+
+```{r}
+tree_default <-spamCsv |>
+  rpart(yesno ~ ., data = _)
+
+tree_default
+```
+
+## Plotting 
+
+```{r}
+library(rpart.plot)
+rpart.plot(tree_default, extra =2)
+```
+
+## Creating a Full Tree
+
+```{r}
+tree_full <- spamCsv |> 
+  rpart(yesno~. , data = _, 
+        control = rpart.control(minsplit = 2, cp = 0))
+rpart.plot(tree_full, extra = 2, 
+           roundint=FALSE,
+            box.palette = list("Gy", "Gn", "Bu", "Bn", 
+                               "Or", "Rd", "Pu")) # specify 7 colors
+```
+
+```{r}
+tree_full
+```
+
+```{r}
+predict(tree_default,spamCsv) |> head()
+```
+
+```{r}
+pred <- predict(tree_default, spamCsv, type="class")
+head(pred)
+```
+
+```{r}
+confusion_table <- with(spamCsv,table(yesno,pred))
+confusion_table
+```
+
+```{r}
+correct  <- confusion_table |> diag() |> sum()
+correct
+```
+
+```{r}
+error  <- confusion_table |> sum() - correct
+error
+```
+
+```{r}
+accuracy <- correct / (correct + error)
+accuracy
+```
+
+Use a function for accuracy
+
+```{r}
+accuracy <- function(truth, prediction) {
+    tbl <- table(truth, prediction)
+    sum(diag(tbl))/sum(tbl)
+}
+
+accuracy(spamCsv |> pull(yesno), pred)
+```
+
+Training error of the full tree
+
+```{r}
+accuracy(spamCsv |> pull(yesno), predict(tree_full,spamCsv, type="class"))
+```
+
+Get a confusion table with more statistics (using caret)
+
+```{r}
+library(caret)
+confusionMatrix(data = pred, 
+                reference = spamCsv |> pull(yesno))
+```
+
+```{r}
+spamCsv
+```
+
+## Making prediction for New Data 
+
+```{r}
+my_spamCsv <- tibble(crl.tot = 23,
+dollar=0.52,
+bang=0.526,
+money=0.15,
+n000=0.00,
+make=0.01,
+yesno=NA)
+```
+
+```{r}
+my_spamCsv<-my_spamCsv |>
+  mutate(across(where(is.logical),factor,levels =c("y","n")))
+my_spamCsv
+```
+
+```{r}
+predict(tree_default, my_spamCsv, type = "class")
+```
+
+## Model Evaluation with Caret 
+
+```{r}
+library(caret)
+```
+
+```{r}
+set.seed(2000)
+```
+
+## Holding out Test data 
+
+```{r}
+inTrain <- createDataPartition(y= spamCsv$yesno, p =.8, list= FALSE)
+spamCsv_train <- spamCsv |> slice(inTrain)
+```
+
+```{r}
+spamCsv_test <- spamCsv |> slice(-inTrain)
+```
+
+## Learn a Model and Tune Hyperparameters on the Training Data
+
+```{r}
+fit <- spamCsv |>
+  train(yesno~.,
+        data=_ ,
+        method = "rpart",
+        control = rpart.control(minsplit = 2),
+        trControl = trainControl(method = "cv", number = 10),
+        tuneLength = 5)
+
+fit
+```
+
+```{r}
+rpart.plot(fit$finalModel, extra =2 ,
+           box.palette = list("Gy", "Gn", "Bu", "Bn", "Or", "Rd", "Pu"))
+```
+
+```{r}
+varImp(fit)
+```
+
+Here is the variable importance without completing splits.
+
+```{r}
+imp <- varImp(fit, compete = FALSE)
+imp
+```
+
+```{r}
+ggplot(imp)
+```
+
+## Testing: Confusion Matrix and Confidence Interval for Accuracy
+
+Using the best model on the test data
+
+```{r}
+pred <- predict(fit, newdata= spamCsv_test)
+pred
+```
+
+```{r}
+confusionMatrix(data = pred,
+                ref = spamCsv_test |> pull(yesno))
+```
+
+## Model Comparison
+
+```{r}
+train_index <- createFolds(spamCsv_train$yesno, k=10)
+```
+
+Building models
+
+```{r}
+rpartFit <- spamCsv_train |> 
+  train(yesno ~ .,
+        data = _,
+        method = "rpart",
+        tuneLength = 10,
+        trControl = trainControl(method = "cv", indexOut = train_index)
+  )
+```
+
+```{r}
+knnFit <- spamCsv_train |> 
+  train(yesno ~ .,
+        data = _,
+        method = "knn",
+        preProcess = "scale",
+          tuneLength = 10,
+          trControl = trainControl(method = "cv", indexOut = train_index)
+  )
+```
+
+Comparing accuracy over all folds:
+
+```{r}
+resamps <- resamples(list(
+  CART = rpartFit,
+  kNearestNeighbors = knnFit
+))
+
+summary(resamps)
+```
+
+```{r}
+library(lattice)
+bwplot(resamps, layout = c(3,1))
+```
+
+```{r}
+difs <- diff(resamps)
+difs
+```
+
+```{r}
+summary(difs)
+```
+
+## Feature Selection and Feature Preparation
+
+```{r}
+if(!require(rJava))
+  install.packages("rJava",type = "source")
+if(!require(RWeka))
+  install.packages("RWeka")
+
+```
+
+```{r}
+Sys.setenv(JAVA_HOME='~/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home')
+```
+
+```{r}
+library(FSelector)
+```
+
+## Univariate Feature Importance Score
+
+```{r}
+weights <-spamCsv |> 
+  chi.squared(yesno ~ ., data = _) |>
+  as_tibble(rownames = "feature") |>
+  arrange(desc(attr_importance))
+
+weights
+```
+
+Plotting importance in descending order (using `reorder` to order factor levels used by `ggplot`)
+
+```{r}
+ggplot(weights,
+       aes(x = attr_importance, y = reorder(feature, attr_importance))) +
+  geom_bar(stat = "identity") + 
+  xlab("Important Score") +
+  ylab("Feature")
+```
+
+Getting the best 4 features:
+
+```{r}
+subset <- cutoff.k(weights |>
+                     column_to_rownames("feature"),4)
+
+subset 
+```
+
+Using the best 4 features to build a model (`FSelector` provides `as.simple.formula`)
+
+```{r}
+f<- as.simple.formula(subset, "yesno")
+f
+```
+
+```{r}
+m <- spamCsv_train |> rpart(f, data= _)
+rpart.plot(m, extra = 2, roundint = FALSE)
+```
+
+```{r}
+spamCsv |>
+  gain.ratio(yesno~. , data= _) |>
+  as_tibble(rownames = "feature") |>
+  arrange(desc(attr_importance))
+```
+
+## Feature Subset Selection
+
+```{r}
+spamCsv |>
+  cfs(yesno ~ ., data= _)
+```
+
+```{r}
+evaluator <- function(subset) {
+  model <- spamCsv_train |> 
+    train(as.simple.formula(subset, "yesno"),
+          data = _,
+          method = "rpart",
+          trControl = trainControl(method = "boot", number = 5),
+          tuneLength = 0)
+  results <- model$resample$Accuracy
+  cat("Trying features:", paste(subset, collapse = " + "), "\n")
+  m <- mean(results)
+  cat("Accuracy:", round(m, 2), "\n\n")
+  m
+}
+```
+
+Start with all feature (but not the class variable `type`)
+
+```{r}
+features <- spamCsv_train |> colnames() |> setdiff("type") 
+```
+
+There are other greedy search strategies available but takes a lot of computational time
+
+```{r}
+##subset <- backward.search(features, evaluator)
+##subset <- forward.search(features, evaluator)
+##subset <- best.first.search(features, evaluator)
+##subset <- hill.climbing.search(features, evaluator)
+##subset
+```
+
+## Using Dummy Variable as Factors
+
+Using dummy variable is not possible, because I need to create it, and this dataset contains only categorical dataset which is the prediction for this dataset. I cannot convert any column in as.factor because each value is unique and random values (numerical). Just using money column to implement this technique.
+
+```{r, warning=FALSE}
+tree_predator <- spamCsv_train |>
+  rpart(money ~ yesno, data= _)
+
+rpart.plot(tree_predator,roundint = FALSE)
+```
+
+This code below doesn't make sense because "money" does not a have categorical value and `n` and `y` we cant predict anything with numerical value. just implementing the code for reference.
+
+```{r}
+spamCsv_train_dummy <- as_tibble(class2ind(spamCsv_train$yesno)) |> 
+  mutate(across(everything(), as.factor)) |>
+  add_column(money = spamCsv_train$money)
+spamCsv_train_dummy 
+```
+
+```{r}
+tree_predator <- spamCsv_train_dummy |> 
+  rpart(money ~ ., 
+        data = _,
+        control = rpart.control(minsplit = 2, cp = 0.01))
+rpart.plot(tree_predator, roundint = FALSE)
+```
+
+```{r}
+fit <- spamCsv_train |> 
+  train(money ~ ., 
+        data = _, 
+        method = "rpart",
+        control = rpart.control(minsplit = 2),
+        tuneGrid = data.frame(cp = 0.01))
+fit
+```
+
+```{r}
+rpart.plot(fit$finalModel)
+```
+
+## Class Imbalance
+
+```{r}
+library(rpart)
+library(rpart.plot)
+```
+
+Class distribution
+
+```{r}
+ggplot(spamCsv, aes(y = yesno)) + geom_bar()
+```
+
+```{r}
+spamCsv_yes <- spamCsv |>
+  mutate(yesno = factor(spamCsv$yesno == "y",
+                       levels = c(TRUE,FALSE),
+                       labels = c("Spam","Not_Spam")))
+```
+
+```{r}
+summary(spamCsv_yes)
+```
+
+```{r}
+ggplot(spamCsv_yes, aes(y=yesno)) + geom_bar()
+```
+
+Creating test and training data. Using a 50/50 split to make sure that the test set has some samples of the rare reptile class.
+
+```{r}
+set.seed(1234)
+nTrain <- createDataPartition(y = spamCsv_yes$yesno, p = .5, list = FALSE)
+training_yes <-spamCsv_yes |> slice(inTrain)
+testing_yes <- spamCsv_yes |> slice(-inTrain)
+```
+
+## Option 1: Use the Data as is and hope for the best
+
+```{r}
+fit <- training_yes |>
+  train(yesno~.,
+        data= _,
+        method = "rpart",
+        trControl = trainControl(method = "cv"))
+```
+
+```{r}
+fit
+```
+
+```{r}
+rpart.plot(fit$finalModel, extra = 2)
+```
+
+```{r}
+confusionMatrix(data = predict(fit, testing_yes),
+                ref = testing_yes$yesno, positive = "Spam")
+```
+
+## Option 2: Balance data with Resampling
+
+```{r}
+library(sampling)
+set.seed(1000) # for repeatability
+
+id <- strata(training_yes, stratanames = "yesno", size = c(50, 50), method = "srswr")
+training_yes_balanced <- training_yes |> 
+  slice(id$ID_unit)
+table(training_yes_balanced$yesno)
+```
+
+```{r}
+fit <- training_yes_balanced |> 
+  train(yesno ~ .,
+        data = _,
+        method = "rpart",
+        trControl = trainControl(method = "cv"),
+        control = rpart.control(minsplit = 5))
+
+fit
+```
+
+```{r}
+rpart.plot(fit$finalModel, extra = 2)
+```
+
+Checking on the unbalanced testing data
+
+```{r}
+confusionMatrix(data = predict(fit, testing_yes),
+                ref  =testing_yes$yesno, positive = "Spam")
+```
+
+```{r}
+id <- strata(training_yes, stratanames = "yesno", size = c(50, 100), method = "srswr")
+training_yes_balanced <- training_yes |> 
+  slice(id$ID_unit)
+table(training_yes_balanced$yesno)
+```
+
+```{r}
+fit <- training_yes_balanced |> 
+  train(yesno ~ .,
+        data = _,
+        method = "rpart",
+        trControl = trainControl(method = "cv"),
+        control = rpart.control(minsplit = 5))
+
+confusionMatrix(data = predict(fit, testing_yes),
+                ref = testing_yes$yesno, positive = "Spam")
+```
+
+## Option 3 : Build a larger tree and use Predicted Probabilities
+
+```{r}
+fit <- training_yes |> 
+  train(yesno ~ .,
+        data = _,
+        method = "rpart",
+        tuneLength = 10,
+        trControl = trainControl(method = "cv",
+        classProbs = TRUE,  ## necessary for predict with type="prob"
+        summaryFunction=twoClassSummary),  ## necessary for ROC
+        metric = "ROC",
+        control = rpart.control(minsplit = 3))
+```
+
+```{r}
+fit
+```
+
+```{r}
+rpart.plot(fit$finalModel, extra = 2)
+```
+
+```{r}
+confusionMatrix(data = predict(fit, testing_yes),
+                ref = testing_yes$yesno, positive = "Spam")
+```
+
+```{r}
+prob <- predict(fit, testing_yes, type = "prob")
+tail(prob)
+```
+
+```{r}
+pred <- as.factor(ifelse(prob[,"Spam"]>=0.01, "Spam", "Not_Spam"))
+
+confusionMatrix(data = pred,
+                ref = testing_yes$yesno, positive = "Spam")
+```
+
+## Plot the ROC curve
+
+```{r}
+library("pROC")
+r <- roc(testing_yes$yesno == "Spam", prob[,"Spam"])
+```
+
+```{r}
+r
+```
+
+```{r}
+ggroc(r) + geom_abline(intercept = 1, slope = 1, color = "darkgrey")
+```
+
+## Option 4: Use a Cost - Sensitive Classifier
+
+```{r}
+cost <- matrix(c(
+  0, 1,
+  100, 0
+), byrow = TRUE, nrow = 2)
+cost
+```
+
+```{r}
+fit <- training_yes |> 
+  train(yesno ~ .,
+        data = _,
+        method = "rpart",
+        parms = list(loss = cost),
+        trControl = trainControl(method = "cv"))
+```
+
+```{r}
+fit
+```
+
+```{r}
+rpart.plot(fit$finalModel, extra = 2)
+```
+
+```{r}
+confusionMatrix(data = predict(fit, testing_yes),
+                ref = testing_yes$yesno, positive = "Spam")
 ```
