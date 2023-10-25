@@ -1985,7 +1985,7 @@ kNearestNeighbors 0.3951                  </code></pre>
 <span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>f</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>yesno ~ bang + dollar + money + crl.tot
-&lt;environment: 0x0000013dccf64168&gt;</code></pre>
+&lt;environment: 0x0000025c78154ad0&gt;</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -4012,6 +4012,9 @@ Caused by error in `if (zero_range(range)) ...`:
 <p><img src="hw-03_files/figure-html/unnamed-chunk-139-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>Performs good has high accuracy, but the boundaries can be improved by increasing the number of neurons</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb227"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb227-1"><a href="#cb227-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span>x <span class="sc">|&gt;</span> nnet<span class="sc">::</span><span class="fu">nnet</span>(species <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb227-2"><a href="#cb227-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var  =</span> <span class="st">"species"</span>, </span>
@@ -4325,6 +4328,9 @@ Caused by error in `if (zero_range(range)) ...`:
 <p><img src="hw-03_files/figure-html/unnamed-chunk-158-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>It is circle dataset, but the model has predicted a linear line to seperate, which might be wrong and has a very low accuracy.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb251"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb251-1"><a href="#cb251-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span>x <span class="sc">|&gt;</span> nnet<span class="sc">::</span><span class="fu">nnet</span>(class <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb251-2"><a href="#cb251-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"class"</span>, </span>
@@ -4337,7 +4343,7 @@ Caused by error in `if (zero_range(range)) ...`:
 </div>
 </div>
 <ul>
-<li>It is circle dataset, but the model has predicted a linear line to seperate, which might be wrong and has a very low accuracy.</li>
+<li>Similar to the 1NN it is performing bad but has improved</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb252"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb252-1"><a href="#cb252-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span>x <span class="sc">|&gt;</span> nnet<span class="sc">::</span><span class="fu">nnet</span>(class <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">size =</span> <span class="dv">4</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>

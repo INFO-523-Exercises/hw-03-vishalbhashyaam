@@ -1382,6 +1382,8 @@ decisionplot(model, x, class_var  = "species",
        fill = "Prediction")
 ```
 
+-   Performs good has high accuracy, but the boundaries can be improved by increasing the number of neurons
+
 ```{r}
 model <-x |> nnet::nnet(species ~ ., data = _, size = 2, trace = FALSE)
 decisionplot(model, x, class_var  = "species", 
@@ -1606,6 +1608,8 @@ decisionplot(model, x, class_var = "class",
        fill = "Prediction")
 ```
 
+-   It is circle dataset, but the model has predicted a linear line to seperate, which might be wrong and has a very low accuracy.
+
 ```{r}
 model <-x |> nnet::nnet(class ~ ., data = _, size = 2, trace = FALSE)
 decisionplot(model, x, class_var = "class", 
@@ -1615,7 +1619,7 @@ decisionplot(model, x, class_var = "class",
        fill = "Prediction")
 ```
 
--   It is circle dataset, but the model has predicted a linear line to seperate, which might be wrong and has a very low accuracy.
+-   Similar to the 1NN it is performing bad but has improved
 
 ```{r}
 model <-x |> nnet::nnet(class ~ ., data = _, size = 4, trace = FALSE)
