@@ -24,7 +24,11 @@ pacman::p_load(tidyverse ,rpart, rpart.plot, caret , lattice, FSelector,
 
 ## Spam E-mail Dataset
 
-I am using the spam e-mail dataset which either requires the tidytuesdayR package or we can read it directly from the github
+I am using the spam e-mail dataset which either requires the tidytuesdayR package or we can read it directly from the github.
+
+The E-mail Spam dataset conatins 4601 rows of information mostly numerical except the last column.
+
+The Spam E-mail Dataset contains 7 columns (crl.tot , dollar , bang , money , n000 , make , yesno) in this the first 6 columns represent the feature vector **x** and the last column is the class label **y.** We will convert the dataframe into tidyverse tibble else a normal table.
 
 ```{r}
 # Reading the dataset directly from github
@@ -79,12 +83,18 @@ tree_default <-spamCsv |>
 tree_default
 ```
 
+-   The formula models the **`yesno`** variable by all other features represented by `.`
+
+-   The class variable needs a factor or rpart will create a regression tree instead of a decision tree.
+
 ## Plotting
 
 ```{r}
 library(rpart.plot)
 rpart.plot(tree_default, extra =2)
 ```
+
+-   This plots the decision created by the formula
 
 ## Creating a Full Tree
 
@@ -98,9 +108,13 @@ rpart.plot(tree_full, extra = 2,
                                "Or", "Rd", "Pu")) # specify 7 colors
 ```
 
+-   The above plot is not clear because there is overplotting in the graph. So this part of full_tree is not posible to visualize for this dataset.
+
 ```{r}
 tree_full
 ```
+
+## Training error on tre with pre-pruning
 
 ```{r}
 predict(tree_default,spamCsv) |> head()
@@ -116,22 +130,30 @@ confusion_table <- with(spamCsv,table(yesno,pred))
 confusion_table
 ```
 
+-   We can see on the Confusion Matrix the correct number of true positive prediction and true negative predictions.
+
 ```{r}
 correct  <- confusion_table |> diag() |> sum()
 correct
 ```
+
+-   Number of true predictions
 
 ```{r}
 error  <- confusion_table |> sum() - correct
 error
 ```
 
+-   umber of false predictions
+
 ```{r}
 accuracy <- correct / (correct + error)
 accuracy
 ```
 
-Use a function for accuracy
+-   Formula for Accuracy
+
+## Using a function for accuracy
 
 ```{r}
 accuracy <- function(truth, prediction) {
@@ -162,6 +184,8 @@ spamCsv
 
 ## Making prediction for New Data
 
+Making a new set of data, to create a new prediction
+
 ```{r}
 my_spamCsv <- tibble(crl.tot = 23,
 dollar=0.52,
@@ -171,6 +195,8 @@ n000=0.00,
 make=0.01,
 yesno=NA)
 ```
+
+Setting columns to be factors like in the training data
 
 ```{r}
 my_spamCsv<-my_spamCsv |>
@@ -184,6 +210,8 @@ predict(tree_default, my_spamCsv, type = "class")
 
 ## Model Evaluation with Caret
 
+This package makes preparing training sets , building classification and regression model and evaluation simple .
+
 ```{r}
 library(caret)
 ```
@@ -193,6 +221,8 @@ set.seed(2000)
 ```
 
 ## Holding out Test data
+
+Test data will not be used to build the data, therefore spilling the data into train and test, where training data will be used to build the model
 
 ```{r}
 inTrain <- createDataPartition(y= spamCsv$yesno, p =.8, list= FALSE)
@@ -205,6 +235,8 @@ spamCsv_test <- spamCsv |> slice(-inTrain)
 
 ## Learn a Model and Tune Hyperparameters on the Training Data
 
+For `rpart` train tries to tune the `cp` parameter using accuracy to chose the best model. minsplit is set to 2, but it can be set to higher values oif the data is abundant.
+
 ```{r}
 fit <- spamCsv |>
   train(yesno~.,
@@ -216,6 +248,10 @@ fit <- spamCsv |>
 
 fit
 ```
+
+-   The Accuracy of the model is decent and Kappa value almost similar to the accuracy. Kappa values is usually used between 2 or more classes, since our model has two classes, we say that kappa value is also excellent.
+
+A model using the best tuning parameters and using all the data supplied to `train()` is available as `fit$finalModel` .
 
 ```{r}
 rpart.plot(fit$finalModel, extra =2 ,
@@ -237,6 +273,8 @@ imp
 ggplot(imp)
 ```
 
+-   We can see from this plot that crt.tot, bang and dollar contributes in giving the prediction for a class than the other feature which has 0 importance or we can say it is entirely useless
+
 ## Testing: Confusion Matrix and Confidence Interval for Accuracy
 
 Using the best model on the test data
@@ -245,6 +283,8 @@ Using the best model on the test data
 pred <- predict(fit, newdata= spamCsv_test)
 pred
 ```
+
+`carret` confusionMatrix calculates the accuracy, confidence intervals, kappa and other evaluation metrics. we need to use the test data to find the generallized error.
 
 ```{r}
 confusionMatrix(data = pred,
@@ -291,10 +331,14 @@ resamps <- resamples(list(
 summary(resamps)
 ```
 
+-   We can see that K-Nearest Neighbor and CART performs really close in terms of accuracy and kappa.
+
 ```{r}
 library(lattice)
 bwplot(resamps, layout = c(3,1))
 ```
+
+-   Overall we can see that K- Nearest Neighbor has a better accuracy and CART has a better Kappa value.
 
 ```{r}
 difs <- diff(resamps)
@@ -305,7 +349,13 @@ difs
 summary(difs)
 ```
 
+-   K Nearest seems to perform better but statistically classifiers do not perform differently.
+
 ## Feature Selection and Feature Preparation
+
+Decision trees selesct the features for splitting implicitly, but we can also select the features
+
+Installing the dependencies for `FSelector`
 
 ```{r}
 if(!require(rJava))
@@ -325,6 +375,8 @@ library(FSelector)
 
 ## Univariate Feature Importance Score
 
+Shows the measure how each variable is associated with the class variable. For discrete features chi-square statistic is used.
+
 ```{r}
 weights <-spamCsv |> 
   chi.squared(yesno ~ ., data = _) |>
@@ -343,6 +395,8 @@ ggplot(weights,
   xlab("Important Score") +
   ylab("Feature")
 ```
+
+-   Bang has the most reliability with the class variables.
 
 Getting the best 4 features:
 
@@ -378,6 +432,8 @@ spamCsv |>
 spamCsv |>
   cfs(yesno ~ ., data= _)
 ```
+
+Black-box feature selection uses an evaluator function (the black box) to calculate a score to be maximized. First, we define an evaluation function that builds a model given a subset of features and calculates a quality score. We use here the average for 5 bootstrap samples (`method = "cv"` can also be used instead), no tuning (to be faster), and the average accuracy as the score.
 
 ```{r}
 evaluator <- function(subset) {
@@ -455,6 +511,8 @@ rpart.plot(fit$finalModel)
 
 ## Class Imbalance
 
+Classifiers have a hard time to learn from data where we have much more observations for one class (called the majority class). This is called the class imbalance problem
+
 ```{r}
 library(rpart)
 library(rpart.plot)
@@ -465,6 +523,10 @@ Class distribution
 ```{r}
 ggplot(spamCsv, aes(y = yesno)) + geom_bar()
 ```
+
+-   We need to create the classes "Spam" and "Not_Spam" to make it into binary classification problem,
+
+-   This dataset is already a binary classification problem
 
 ```{r}
 spamCsv_yes <- spamCsv |>
@@ -481,7 +543,7 @@ summary(spamCsv_yes)
 ggplot(spamCsv_yes, aes(y=yesno)) + geom_bar()
 ```
 
-Creating test and training data. Using a 50/50 split to make sure that the test set has some samples of the rare reptile class.
+Creating test and training data. Using a 50/50 split to make sure that the test set has some samples of the yes and no classes in them
 
 ```{r}
 set.seed(1234)
@@ -508,12 +570,18 @@ fit
 rpart.plot(fit$finalModel, extra = 2)
 ```
 
+The tree does not predict everything as spam instead there is a condition where it has spam and not_spam.
+
 ```{r}
 confusionMatrix(data = predict(fit, testing_yes),
                 ref = testing_yes$yesno, positive = "Spam")
 ```
 
+-   Accuracy is decent and kappa aslo has manageable value, the no-information rate is lower than the accuracy this means that model is good. since we are dealing iwth imbalance , we have good score of sensitivity, the chance to identify positive examples.
+
 ## Option 2: Balance data with Resampling
+
+We use stratified sampling with replacement (to oversample the minority/positive class). You could also use SMOTE (in package **DMwR**) or other sampling strategies (e.g., from package **unbalanced**). We use 50+50 observations here (**Note:** many samples will be chosen several times).
 
 ```{r}
 library(sampling)
@@ -547,6 +615,10 @@ confusionMatrix(data = predict(fit, testing_yes),
                 ref  =testing_yes$yesno, positive = "Spam")
 ```
 
+-   With re sampling the accuracy has decreased and the value of kappa also decreased with the decrease in sensitivity, with imbalanced dataset we want the sensitivity to increase, therefore this method is not suitable compared to the one we did before.
+
+There is a tradeoff between sensitivity and specificity (how many of the identified animals are really reptiles) The tradeoff can be controlled using the sample proportions. We can sample more Spam to increase sensitivity at the cost of lower specificity.
+
 ```{r}
 id <- strata(training_yes, stratanames = "yesno", size = c(50, 100), method = "srswr")
 training_yes_balanced <- training_yes |> 
@@ -566,7 +638,11 @@ confusionMatrix(data = predict(fit, testing_yes),
                 ref = testing_yes$yesno, positive = "Spam")
 ```
 
+-   We can see that Sensitivity, Accuracy and the kappa has increased with a small reduction in specificity .
+
 ## Option 3 : Build a larger tree and use Predicted Probabilities
+
+Increase in complexity and require less data, tries to improve accuracy .
 
 ```{r}
 fit <- training_yes |> 
@@ -606,7 +682,11 @@ confusionMatrix(data = pred,
                 ref = testing_yes$yesno, positive = "Spam")
 ```
 
+-   The Accuracy is very low, model is very bad. This maybe because the data is very large, so the complexity is also very larger compared, This plays a major role in assessing the accuracy.
+
 ## Plot the ROC curve
+
+Since it is a binary classification problem, the area under the curve represents a single number for how well the classifier works (Closer to one is better)
 
 ```{r}
 library("pROC")
@@ -621,7 +701,15 @@ r
 ggroc(r) + geom_abline(intercept = 1, slope = 1, color = "darkgrey")
 ```
 
+-   The line has a trend starts to get closer to 1 and at the end touches 1.
+
 ## Option 4: Use a Cost - Sensitive Classifier
+
+The implementation of CART in `rpart` can use a cost matrix for making splitting decisions (as parameter `loss`). The matrix has the form
+
+TP FP FN TN
+
+TP and TN have to be 0. We make FN very expensive (100).
 
 ```{r}
 cost <- matrix(c(
@@ -653,7 +741,15 @@ confusionMatrix(data = predict(fit, testing_yes),
                 ref = testing_yes$yesno, positive = "Spam")
 ```
 
-# Classification: Alternative Techniques 
+-   The accuracy of the model is not good , it is bad. The no-information rate is lower than the accuracy , kappa has a very bad value, The sensitivity and specificity trade off is also very bad. (True positive examples is very low i this method)
+
+### Question:
+
+Based on the frequency of certain keywords and symbols in an email, can we classify the email as 'spam' or 'not spam'?
+
+Yes, according to the data analysis and model analysis completed above , we can say that we can classify the eamil as "Spam" and "Not_spam" based on the repetition of certain keywords and symbols
+
+# Classification: Alternative Techniques
 
 ## Install packages
 
@@ -690,9 +786,17 @@ Show fewer Digits
 options(digits = 3)
 ```
 
-# Introduction 
+# Introduction
 
-## Training and Testing data 
+## Training and Testing data
+
+## Spam E-mail Dataset
+
+I am using the spam e-mail dataset which either requires the tidytuesdayR package or we can read it directly from the github.
+
+The E-mail Spam dataset conatins 4601 rows of information mostly numerical except the last column.
+
+The Spam E-mail Dataset contains 7 columns (crl.tot , dollar , bang , money , n000 , make , yesno) in this the first 6 columns represent the feature vector **x** and the last column is the class label **y.** We will convert the dataframe into tidyverse tibble else a normal table.
 
 ```{r}
 # We will use the email spam dataset as used earlier
@@ -718,7 +822,7 @@ SpamCsv_train <- dplyr::slice(SpamCsv,inTrain)
 SpamCsv_test <- dplyr::slice(SpamCsv,-inTrain)
 ```
 
-## Fitting different Classification Models to the Training Data 
+## Fitting different Classification Models to the Training Data
 
 Creating a fixed sampling scheme(10-folds) , so that we can compare the fitted models later.
 
@@ -738,11 +842,19 @@ ctreeFit <- SpamCsv |> train (yesno ~ .,
 ctreeFit
 ```
 
+-   As we can see that accuracy for the model is high and Kappa value is also high
+
+-   Since it is fitted on train data we will not know how it works on new data (Test data)
+
 The Plot looks like a mess because there is a lot of features and data involved
 
 ```{r}
 plot(ctreeFit$finalModel)
 ```
+
+-   The best parameters tuned for the model is used in the above figure.
+
+-   This is the result of overplotting.
 
 ## C 4.5 Decision Tree
 
@@ -758,9 +870,15 @@ C45Fit <- SpamCsv_train |> train(yesno ~.,
 C45Fit
 ```
 
+-   C = 0.378 , M=1 ,Accuracy = 0.891 ,Kappa = 0.764
+
+-   The accuracy for this model is again high and the Kappa is also relativly high and performs better than Conditional Inference tree.
+
 ```{r}
 C45Fit$finalModel
 ```
+
+-   The J48 pruned tree is shown above, there are 117 brains and 59 main nodes to the tree.
 
 ## K-Nearest Neighbors
 
@@ -775,9 +893,15 @@ knnFit <- SpamCsv_train |> train(yesno ~ .,
 knnFit
 ```
 
+-   The K- nearest Neighbor has better accuracy and kappa score than the decision tree.
+
+-   it is the best model based on the training data , and might be overfitting, because it might perform bad on the test data
+
 ```{r}
 knnFit$finalModel
 ```
+
+-   The above out come distribution shows the prediction of class "y" and "n"
 
 ## PART (Rule-based classifier)
 
@@ -790,9 +914,15 @@ rulesFit <- SpamCsv_train |> train(yesno ~ .,
 rulesFit
 ```
 
+-   The above inference for PART gives a high accuracy and kappa score but is bad compared to the knn - classifier.
+
+-   It might not be overfitting on the data and might perform well on the testing data.
+
 ```{r}
 rulesFit$finalModel
 ```
+
+-   The above inference shows the rules about the algorithm works on this training data.
 
 ## Linear Support Vector Machines
 
@@ -809,6 +939,10 @@ svmFit
 svmFit$finalModel
 ```
 
+-   Compared to knn the best classifier for this data until now, the accuracy is moderate, not good nor bad, the kappa score is very low compared to the knn classifier, the kappa score indicates the agreement between imbalanced categories in the dataset in terms to calculate the accuracy.
+
+-   This kappa score means there is moderate agreement that the class variable is somewhat distributed in the dataset
+
 ## Random Forest
 
 ```{r}
@@ -823,6 +957,8 @@ randomForestFit
 ```{r}
 randomForestFit$finalModel
 ```
+
+-   The accuracy is better than the knn classifier, which makes it more prone to overfitting, the accuracy is very high and the kappa value means that there is near perfect agreement of the target variable distribution
 
 ## Gradient Boosted Decision Trees (xgboost)
 
@@ -844,6 +980,12 @@ xgboostFit <- SpamCsv_train |> train(yesno ~ .,
 xgboostFit
 ```
 
+-   Accuracy of the model is comparatively low than the best classifier (random forest) until now.
+
+-   The model is mediocre and does not perform well as the other models we have seen until now.
+
+-   The reason I am just reffering any model as not good compared to the best model is because the we are only inferring on the training data, so i compare them to the best accuracy and kappa score.
+
 ```{r}
 xgboostFit$finalModel
 ```
@@ -858,6 +1000,8 @@ nnetFit <- SpamCsv |> train(yesno ~ .,
                             trControl = trainControl(method = "cv", indexOut = train_index),trace = FALSE)
 nnetFit
 ```
+
+-   The Accuracy for neural network is also mediocre when compared to the best model random forest classifier and the kappa score is also in moderate agreement.
 
 ```{r}
 nnetFit$finalModel
@@ -885,10 +1029,18 @@ resamps
 summary(resamps)
 ```
 
+-   We can clearly see the Random Forest is the best model for classification, next to it is the K- Nearest Neighbor, all other models perform bad when compared to these models in terms of accuracy.
+
+-   Kappa score is relatively close for knn and random forest, but still random forest has the better scores and this means it is in near perfect agreement.
+
 ```{r}
 library(lattice)
 bwplot(resamps, layout = c(3,1))
 ```
+
+The Box - plot shows that random forest performed better in all ten folds and knn is the closest to it.
+
+This means that the inference on the testing data might be similar for the both, not much of a difference in the predictions.
 
 ```{r}
 difs <- diff(resamps)
@@ -899,9 +1051,11 @@ difs
 summary(difs)
 ```
 
-## Applying the chosen model to the Test data 
+-   This shows that there is a huge difference in the model, all model perform decent, but ctree in the first row shows has a negative value, it can rejected since it has \<0.05 value by null hypothesis.
 
-Most of the model do well on the train data, here we choose random forest model, since it has performed better than any other on the train data.
+## Applying the chosen model to the Test data
+
+Most of the model do well on the train data, here we choose random forest model, since it has performed better than any other on the train data and hope it does good on the testing data as well.
 
 ```{r}
 pr <- predict(randomForestFit, SpamCsv_test)
@@ -915,6 +1069,14 @@ pr
 confusionMatrix(pr, reference = spamCsv_test$yesno)
 
 ```
+
+-   The accuracy on the best model from training data which is random forest classifier performs good on the testing data as well.
+
+-   This means it does not overfit on the testing data.
+
+-   Maybe if we tweak the hyperparameters of the random forest model a bit, it might perform even better, or randomize the data for training.
+
+-   We can also choose a another model like knn to see the inference.
 
 ## Comparing Decision Boundaries of Popular Classification Techniques.
 
@@ -991,7 +1153,7 @@ decisionplot <- function(model, data, class_var,
 }
 ```
 
-## Using Penguins Dataset 
+## Using Penguins Dataset
 
 For easier visualization, we use two dimensions of the penguins dataset. Contour lines visualize the density like mountains on a map
 
@@ -1017,6 +1179,8 @@ ggplot(x, aes(x = bill_length_mm, y = bill_depth_mm, fill = species)) +
        alpha = "Density")
 ```
 
+-   In the above plot we can see that there 3 classes and there are some points which is outside those 3 classes =, we can call them outlier as they wont affect the prediction in any way. We can remove them using some techniques ised in statistics.
+
 ## K-Nearest Neighbors Classifier
 
 ```{r}
@@ -1029,6 +1193,8 @@ decisionplot(model, x, class_var = "species") +
        fill = "Prediction")
 ```
 
+-   at k = 1 the training accuracy is one, this means it has predicted the classes perfectly, but we can see that the areas are over lapping each other
+
 ```{r}
 model <- x |> caret::knn3(species ~ ., data = _, k = 3)
 decisionplot(model, x, class_var = "species") + 
@@ -1039,6 +1205,8 @@ decisionplot(model, x, class_var = "species") +
        fill = "Prediction")
 ```
 
+-   The white areas the common points or the spots are in the same place .
+
 ```{r}
 model <- x |> caret::knn3(species ~ ., data = _, k = 9)
 decisionplot(model, x, class_var = "species") + 
@@ -1048,6 +1216,8 @@ decisionplot(model, x, class_var = "species") +
        shape = "Species",
        fill = "Prediction")
 ```
+
+-   As k = 9 which is increased the boundary get smooth and we get a clear picture of the boundaries, it fits better than k = 1
 
 ## Naive bayes Classifier
 
@@ -1061,6 +1231,8 @@ decisionplot(model, x, class_var = "species",
        shape = "Species",
        fill = "Prediction") 
 ```
+
+-   Naive bayes relies on probability, it has also done a good job in diving the boundaries for different classes.
 
 ## Linear Discriminant Analysis
 
@@ -1078,9 +1250,6 @@ decisionplot(model, x, class_var = "species") +
 
 ```{r}
 model <- x |> nnet::multinom(species ~., data = _)
-```
-
-```{r}
 decisionplot(model, x, class_var = "species") + 
   labs(title = "Multinomial Logistic Regression",
        x = "Bill length (mm)",
@@ -1090,6 +1259,8 @@ decisionplot(model, x, class_var = "species") +
 
 
 ```
+
+-   We can the prediction of the boundaries for multinomial is different than the LDA and has more accuracy, but not that significant.
 
 ## Decision trees
 
@@ -1114,6 +1285,10 @@ decisionplot(model, x, class_var = "species") +
        fill = "Prediction")
 ```
 
+-   Training accuracy of overfitting is higher because an higher order complexity is introduced to over fit the data.
+
+-   THe pink space int the plot shows the common point for 3 classes.
+
 ```{r}
 model <- x |> C50::C5.0(species ~ ., data = _)
 decisionplot(model, x, class_var = "species") + 
@@ -1124,7 +1299,11 @@ decisionplot(model, x, class_var = "species") +
        fill = "Prediction")
 ```
 
-## Random Forest 
+-   The lighter green is still chinstrap but the prediction is not that confident because it is near the boundary.
+
+-   The accuray is very high
+
+## Random Forest
 
 ```{r}
 model <- x |> randomForest::randomForest(species ~ ., data = _)
@@ -1135,6 +1314,10 @@ decisionplot(model, x, class_var = "species") +
        shape = "Species",
        fill = "Prediction")
 ```
+
+-   Random forest has performed good with the dataset, 100% it has perfect predictions.
+
+-    By looking at the boundary, how curvy it is, we can see it has better boundaries for the classes.
 
 ## SVM
 
@@ -1148,6 +1331,8 @@ decisionplot(model, x, class_var = "species") +
        fill = "Prediction")
 ```
 
+-   Linear kernel has straight lines as the boundaries with no curve .
+
 ```{r}
 model <- x |> e1071::svm(species ~ ., data = _, kernel = "radial")
 decisionplot(model, x, class_var = "species") + 
@@ -1157,6 +1342,8 @@ decisionplot(model, x, class_var = "species") +
        shape = "Species",
        fill = "Prediction")
 ```
+
+-   Radial kernel has some sort curve in them, it leans towards the point in the boundaries to assume its shape.
 
 ```{r}
 model <- x |> e1071::svm(species ~ ., data = _, kernel = "polynomial")
@@ -1168,6 +1355,8 @@ decisionplot(model, x, class_var = "species") +
        fill = "Prediction")
 ```
 
+-   It increases its complexity of the model to bring a better prediction, but this has lower accuracy compared to the other SVM's.
+
 ```{r}
 model <- x |> e1071::svm(species ~ ., data = _, kernel = "sigmoid")
 decisionplot(model, x, class_var = "species") + 
@@ -1177,6 +1366,8 @@ decisionplot(model, x, class_var = "species") +
        shape = "Species",
        fill = "Prediction")
 ```
+
+-   The Sigmoid kernel divides it s boundaries similar to the sin graph.
 
 ## Single Layered Feed Forward Neural Network
 
@@ -1202,6 +1393,8 @@ decisionplot(model, x, class_var  = "species",
        fill = "Prediction")
 ```
 
+-   Increasing the neuron increased the accuracy , the boundaries look like a linear line with some deviation.
+
 ```{r}
 model <-x |> nnet::nnet(species ~ ., data = _, size = 4, trace = FALSE)
 decisionplot(model, x, class_var  = "species", 
@@ -1212,6 +1405,8 @@ decisionplot(model, x, class_var  = "species",
        shape = "Species",
        fill = "Prediction")
 ```
+
+-   again Increasing the neuron again increased the accuracy, has defined a better boundary for the classes
 
 ```{r}
 model <-x |> nnet::nnet(species ~ ., data = _, size = 10, trace = FALSE)
@@ -1224,9 +1419,13 @@ decisionplot(model, x, class_var  = "species",
        fill = "Prediction")
 ```
 
+-   10 neurons defines even better boundary showing common points(white area).
+
+-   Comparatively better performance.
+
 ## Circle Dataset
 
-This dataset is not linearly seperable
+This dataset is not linearly separable
 
 ```{r}
 set.seed(1000)
@@ -1257,6 +1456,8 @@ decisionplot(model, x, class_var = "class") +
        fill = "Prediction")
 ```
 
+-   Again proves to be a better classifier compared to other models, But the k = 1 has no definition in the boundary for the points lying on the boundary.
+
 ```{r}
 model <- x |> caret::knn3(class ~ ., data = _, k = 10)
 decisionplot(model, x, class_var = "class") + 
@@ -1264,6 +1465,8 @@ decisionplot(model, x, class_var = "class") +
        shape = "Class",
        fill = "Prediction")
 ```
+
+-   Has a better boundary definition than the k = 1. Clearly has defined two boundaries
 
 ## Naive Bayes Classifier
 
@@ -1276,6 +1479,8 @@ decisionplot(model, x, class_var = "class",
        fill = "Prediction")
 ```
 
+-   This model has low confidence level of predicting the class as we can see the faded red for the prediction of a class.
+
 ## Linear Discriminant Analysis (LDA)
 
 ```{r}
@@ -1285,6 +1490,8 @@ decisionplot(model, x, class_var = "class") +
        shape = "Class",
        fill = "Prediction")
 ```
+
+-   has a boundary line for the the classes, but as we can see again this model has no confidence in prediction as we can more white space than the predicition of classes
 
 ## Logistic Regression
 
@@ -1298,6 +1505,8 @@ decisionplot(model, x, class_var = "class") +
        fill = "Prediction")
 ```
 
+-   H class 2 is found abundant. but the predictions are wrong, the accuracy is very low, this is a circle dataset, but a linear line is separating as boundaries.
+
 ## Decision Trees
 
 ```{r}
@@ -1308,6 +1517,8 @@ decisionplot(model, x, class_var = "class") +
        fill = "Prediction")
 ```
 
+-   Has a bit of less definition for the boundary as it is not smooth.
+
 ```{r}
 model <- x |> rpart::rpart(class ~ ., data = _,
   control = rpart.control(cp = 0.001, minsplit = 1))
@@ -1317,6 +1528,8 @@ decisionplot(model, x, class_var = "class") +
        fill = "Prediction")
 ```
 
+-   Overfitting ensures it has a prediction, and the boundary has well defined shape for the points lying at the boundary line.
+
 ```{r}
 model <- x |> C50::C5.0(class ~ ., data = _)
 decisionplot(model, x, class_var = "class") + 
@@ -1324,6 +1537,8 @@ decisionplot(model, x, class_var = "class") +
        shape = "Class",
        fill = "Prediction")
 ```
+
+-   CS 50 has a similar boundary to CART, but the prediction of classes vary.
 
 ## Random Forest
 
@@ -1336,7 +1551,9 @@ decisionplot(model, x, class_var = "class") +
        fill = "Prediction")
 ```
 
-## SVM 
+-   Boundaries are well defined with white spaces indicating common points, with a high accuracy of 100!% perfect prediction of classes.
+
+## SVM
 
 ```{r}
 model <- x |> e1071::svm(class ~ ., data = _, kernel = "linear")
@@ -1346,6 +1563,8 @@ decisionplot(model, x, class_var = "class") +
        fill = "Prediction")
 ```
 
+-   The Linear kernel predicts every prediction as class 2. it is a bad model.
+
 ```{r}
 model <- x |> e1071::svm(class ~ ., data = _, kernel = "radial")
 decisionplot(model, x, class_var = "class") + 
@@ -1353,6 +1572,8 @@ decisionplot(model, x, class_var = "class") +
        shape = "Class",
        fill = "Prediction")
 ```
+
+-   Compared to linear kernel radial kernel performs way better with a high accuracy.
 
 ```{r}
 model <- x |> e1071::svm(class ~ ., data = _, kernel = "polynomial")
@@ -1362,6 +1583,8 @@ decisionplot(model, x, class_var = "class") +
        fill = "Prediction")
 ```
 
+-   The polynomial kernel perform bad on circle dataset, as it gives curves in the boundaries but not completes as a circle and so it has a low accuracy.
+
 ```{r}
 model <- x |> e1071::svm(class ~ ., data = _, kernel = "sigmoid")
 decisionplot(model, x, class_var = "class") + 
@@ -1369,6 +1592,8 @@ decisionplot(model, x, class_var = "class") +
        shape = "Class",
        fill = "Prediction")
 ```
+
+-   It is similar to the polynomial kernel, perform very bad on circle datasets.
 
 ## Single Layered Feed Forward Neural Network
 
@@ -1390,6 +1615,8 @@ decisionplot(model, x, class_var = "class",
        fill = "Prediction")
 ```
 
+-   It is circle dataset, but the model has predicted a linear line to seperate, which might be wrong and has a very low accuracy.
+
 ```{r}
 model <-x |> nnet::nnet(class ~ ., data = _, size = 4, trace = FALSE)
 decisionplot(model, x, class_var = "class", 
@@ -1399,6 +1626,8 @@ decisionplot(model, x, class_var = "class",
        fill = "Prediction")
 ```
 
+-   it has a better boundary definition compared to the 1 neuron neural network, and has almost perfect accuracy.
+
 ```{r}
 model <-x |> nnet::nnet(class ~ ., data = _, size = 10, trace = FALSE)
 decisionplot(model, x, class_var = "class", 
@@ -1407,3 +1636,7 @@ decisionplot(model, x, class_var = "class",
        shape = "Class",
        fill = "Prediction")
 ```
+
+-   At the end we can see that increasing the number of neurons increases the definition of the boundaries. Performs better than NN 4.
+
+We can see that Knn , Random Forest and 10 neuron Neural Network worked better with the circle dataset.

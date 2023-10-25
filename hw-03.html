@@ -120,7 +120,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="spam-e-mail-dataset" class="level2">
 <h2 class="anchored" data-anchor-id="spam-e-mail-dataset">Spam E-mail Dataset</h2>
-<p>I am using the spam e-mail dataset which either requires the tidytuesdayR package or we can read it directly from the github</p>
+<p>I am using the spam e-mail dataset which either requires the tidytuesdayR package or we can read it directly from the github.</p>
+<p>The E-mail Spam dataset conatins 4601 rows of information mostly numerical except the last column.</p>
+<p>The Spam E-mail Dataset contains 7 columns (crl.tot , dollar , bang , money , n000 , make , yesno) in this the first 6 columns represent the feature vector <strong>x</strong> and the last column is the class label <strong>y.</strong> We will convert the dataframe into tidyverse tibble else a normal table.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reading the dataset directly from github</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -425,6 +427,10 @@ node), split, n, loss, yval, (yprob)
    3) dollar&gt;=0.0555 1130  133 y (0.1176991 0.8823009) *</code></pre>
 </div>
 </div>
+<ul>
+<li><p>The formula models the <strong><code>yesno</code></strong> variable by all other features represented by <code>.</code></p></li>
+<li><p>The class variable needs a factor or rpart will create a regression tree instead of a decision tree.</p></li>
+</ul>
 </section>
 <section id="plotting" class="level2">
 <h2 class="anchored" data-anchor-id="plotting">Plotting</h2>
@@ -435,6 +441,9 @@ node), split, n, loss, yval, (yprob)
 <p><img src="hw-03_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>This plots the decision created by the formula</li>
+</ul>
 </section>
 <section id="creating-a-full-tree" class="level2">
 <h2 class="anchored" data-anchor-id="creating-a-full-tree">Creating a Full Tree</h2>
@@ -453,6 +462,9 @@ node), split, n, loss, yval, (yprob)
 <p><img src="hw-03_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>The above plot is not clear because there is overplotting in the graph. So this part of full_tree is not posible to visualize for this dataset.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>tree_full</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1430,6 +1442,9 @@ node), split, n, loss, yval, (yprob)
                        511) dollar&gt;=0.1595 287    0 y (0.000000000 1.000000000) *</code></pre>
 </div>
 </div>
+</section>
+<section id="training-error-on-tre-with-pre-pruning" class="level2">
+<h2 class="anchored" data-anchor-id="training-error-on-tre-with-pre-pruning">Training error on tre with pre-pruning</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(tree_default,spamCsv) <span class="sc">|&gt;</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -1461,6 +1476,9 @@ yesno    n    y
     y  364 1449</code></pre>
 </div>
 </div>
+<ul>
+<li>We can see on the Confusion Matrix the correct number of true positive prediction and true negative predictions.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>correct  <span class="ot">&lt;-</span> confusion_table <span class="sc">|&gt;</span> <span class="fu">diag</span>() <span class="sc">|&gt;</span> <span class="fu">sum</span>()</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>correct</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1468,6 +1486,9 @@ yesno    n    y
 <pre><code>[1] 3966</code></pre>
 </div>
 </div>
+<ul>
+<li>Number of true predictions</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>error  <span class="ot">&lt;-</span> confusion_table <span class="sc">|&gt;</span> <span class="fu">sum</span>() <span class="sc">-</span> correct</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1475,6 +1496,9 @@ yesno    n    y
 <pre><code>[1] 635</code></pre>
 </div>
 </div>
+<ul>
+<li>umber of false predictions</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>accuracy <span class="ot">&lt;-</span> correct <span class="sc">/</span> (correct <span class="sc">+</span> error)</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>accuracy</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1482,7 +1506,12 @@ yesno    n    y
 <pre><code>[1] 0.8619865</code></pre>
 </div>
 </div>
-<p>Use a function for accuracy</p>
+<ul>
+<li>Formula for Accuracy</li>
+</ul>
+</section>
+<section id="using-a-function-for-accuracy" class="level2">
+<h2 class="anchored" data-anchor-id="using-a-function-for-accuracy">Using a function for accuracy</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>accuracy <span class="ot">&lt;-</span> <span class="cf">function</span>(truth, prediction) {</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    tbl <span class="ot">&lt;-</span> <span class="fu">table</span>(truth, prediction)</span>
@@ -1558,6 +1587,7 @@ Prediction    n    y
 </section>
 <section id="making-prediction-for-new-data" class="level2">
 <h2 class="anchored" data-anchor-id="making-prediction-for-new-data">Making prediction for New Data</h2>
+<p>Making a new set of data, to create a new prediction</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>my_spamCsv <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">crl.tot =</span> <span class="dv">23</span>,</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="at">dollar=</span><span class="fl">0.52</span>,</span>
@@ -1567,6 +1597,7 @@ Prediction    n    y
 <span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="at">make=</span><span class="fl">0.01</span>,</span>
 <span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="at">yesno=</span><span class="cn">NA</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Setting columns to be factors like in the training data</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>my_spamCsv<span class="ot">&lt;-</span>my_spamCsv <span class="sc">|&gt;</span></span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.logical),factor,<span class="at">levels =</span><span class="fu">c</span>(<span class="st">"y"</span>,<span class="st">"n"</span>)))</span>
@@ -1589,6 +1620,7 @@ Levels: n y</code></pre>
 </section>
 <section id="model-evaluation-with-caret" class="level2">
 <h2 class="anchored" data-anchor-id="model-evaluation-with-caret">Model Evaluation with Caret</h2>
+<p>This package makes preparing training sets , building classification and regression model and evaluation simple .</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -1598,6 +1630,7 @@ Levels: n y</code></pre>
 </section>
 <section id="holding-out-test-data" class="level2">
 <h2 class="anchored" data-anchor-id="holding-out-test-data">Holding out Test data</h2>
+<p>Test data will not be used to build the data, therefore spilling the data into train and test, where training data will be used to build the model</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>inTrain <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(<span class="at">y=</span> spamCsv<span class="sc">$</span>yesno, <span class="at">p =</span>.<span class="dv">8</span>, <span class="at">list=</span> <span class="cn">FALSE</span>)</span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>spamCsv_train <span class="ot">&lt;-</span> spamCsv <span class="sc">|&gt;</span> <span class="fu">slice</span>(inTrain)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1611,6 +1644,7 @@ Levels: n y</code></pre>
 </section>
 <section id="learn-a-model-and-tune-hyperparameters-on-the-training-data" class="level2">
 <h2 class="anchored" data-anchor-id="learn-a-model-and-tune-hyperparameters-on-the-training-data">Learn a Model and Tune Hyperparameters on the Training Data</h2>
+<p>For <code>rpart</code> train tries to tune the <code>cp</code> parameter using accuracy to chose the best model. minsplit is set to 2, but it can be set to higher values oif the data is abundant.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> spamCsv <span class="sc">|&gt;</span></span>
 <span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">train</span>(yesno<span class="sc">~</span>.,</span>
@@ -1644,6 +1678,10 @@ Accuracy was used to select the optimal model using the largest value.
 The final value used for the model was cp = 0.006343078.</code></pre>
 </div>
 </div>
+<ul>
+<li>The Accuracy of the model is decent and Kappa value almost similar to the accuracy. Kappa values is usually used between 2 or more classes, since our model has two classes, we say that kappa value is also excellent.</li>
+</ul>
+<p>A model using the best tuning parameters and using all the data supplied to <code>train()</code> is available as <code>fit$finalModel</code> .</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rpart.plot</span>(fit<span class="sc">$</span>finalModel, <span class="at">extra =</span><span class="dv">2</span> ,</span>
 <span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">box.palette =</span> <span class="fu">list</span>(<span class="st">"Gy"</span>, <span class="st">"Gn"</span>, <span class="st">"Bu"</span>, <span class="st">"Bn"</span>, <span class="st">"Or"</span>, <span class="st">"Rd"</span>, <span class="st">"Pu"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1687,6 +1725,9 @@ make       0.00</code></pre>
 <p><img src="hw-03_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>We can see from this plot that crt.tot, bang and dollar contributes in giving the prediction for a class than the other feature which has 0 importance or we can say it is entirely useless</li>
+</ul>
 </section>
 <section id="testing-confusion-matrix-and-confidence-interval-for-accuracy" class="level2">
 <h2 class="anchored" data-anchor-id="testing-confusion-matrix-and-confidence-interval-for-accuracy">Testing: Confusion Matrix and Confidence Interval for Accuracy</h2>
@@ -1723,6 +1764,7 @@ make       0.00</code></pre>
 Levels: n y</code></pre>
 </div>
 </div>
+<p><code>carret</code> confusionMatrix calculates the accuracy, confidence intervals, kappa and other evaluation metrics. we need to use the test data to find the generallized error.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(<span class="at">data =</span> pred,</span>
 <span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">ref =</span> spamCsv_test <span class="sc">|&gt;</span> <span class="fu">pull</span>(yesno))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1815,6 +1857,9 @@ CART                 0
 kNearestNeighbors    0</code></pre>
 </div>
 </div>
+<ul>
+<li>We can see that K-Nearest Neighbor and CART performs really close in terms of accuracy and kappa.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lattice)</span>
 <span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bwplot</span>(resamps, <span class="at">layout =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1822,6 +1867,9 @@ kNearestNeighbors    0</code></pre>
 <p><img src="hw-03_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>Overall we can see that K- Nearest Neighbor has a better accuracy and CART has a better Kappa value.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>difs <span class="ot">&lt;-</span> <span class="fu">diff</span>(resamps)</span>
 <span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>difs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1858,9 +1906,14 @@ CART                     -0.01068
 kNearestNeighbors 0.3951                  </code></pre>
 </div>
 </div>
+<ul>
+<li>K Nearest seems to perform better but statistically classifiers do not perform differently.</li>
+</ul>
 </section>
 <section id="feature-selection-and-feature-preparation" class="level2">
 <h2 class="anchored" data-anchor-id="feature-selection-and-feature-preparation">Feature Selection and Feature Preparation</h2>
+<p>Decision trees selesct the features for splitting implicitly, but we can also select the features</p>
+<p>Installing the dependencies for <code>FSelector</code></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(rJava))</span>
 <span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"rJava"</span>,<span class="at">type =</span> <span class="st">"source"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1882,6 +1935,7 @@ kNearestNeighbors 0.3951                  </code></pre>
 </section>
 <section id="univariate-feature-importance-score" class="level2">
 <h2 class="anchored" data-anchor-id="univariate-feature-importance-score">Univariate Feature Importance Score</h2>
+<p>Shows the measure how each variable is associated with the class variable. For discrete features chi-square statistic is used.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>weights <span class="ot">&lt;-</span>spamCsv <span class="sc">|&gt;</span> </span>
 <span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">chi.squared</span>(yesno <span class="sc">~</span> ., <span class="at">data =</span> _) <span class="sc">|&gt;</span></span>
@@ -1912,6 +1966,9 @@ kNearestNeighbors 0.3951                  </code></pre>
 <p><img src="hw-03_files/figure-html/unnamed-chunk-48-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>Bang has the most reliability with the class variables.</li>
+</ul>
 <p>Getting the best 4 features:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>subset <span class="ot">&lt;-</span> <span class="fu">cutoff.k</span>(weights <span class="sc">|&gt;</span></span>
@@ -1928,7 +1985,7 @@ kNearestNeighbors 0.3951                  </code></pre>
 <span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>f</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>yesno ~ bang + dollar + money + crl.tot
-&lt;environment: 0x00000258356f9a80&gt;</code></pre>
+&lt;environment: 0x0000013dccf64168&gt;</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -1965,6 +2022,7 @@ kNearestNeighbors 0.3951                  </code></pre>
 <pre><code>[1] "dollar" "bang"   "money"  "n000"  </code></pre>
 </div>
 </div>
+<p>Black-box feature selection uses an evaluator function (the black box) to calculate a score to be maximized. First, we define an evaluation function that builds a model given a subset of features and calculates a quality score. We use here the average for 5 bootstrap samples (<code>method = "cv"</code>&nbsp;can also be used instead), no tuning (to be faster), and the average accuracy as the score.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>evaluator <span class="ot">&lt;-</span> <span class="cf">function</span>(subset) {</span>
 <span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a>  model <span class="ot">&lt;-</span> spamCsv_train <span class="sc">|&gt;</span> </span>
@@ -2072,6 +2130,7 @@ Tuning parameter 'cp' was held constant at a value of 0.01</code></pre>
 </section>
 <section id="class-imbalance" class="level2">
 <h2 class="anchored" data-anchor-id="class-imbalance">Class Imbalance</h2>
+<p>Classifiers have a hard time to learn from data where we have much more observations for one class (called the majority class). This is called the class imbalance problem</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb104"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
 <span id="cb104-2"><a href="#cb104-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart.plot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -2083,6 +2142,10 @@ Tuning parameter 'cp' was held constant at a value of 0.01</code></pre>
 <p><img src="hw-03_files/figure-html/unnamed-chunk-63-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li><p>We need to create the classes “Spam” and “Not_Spam” to make it into binary classification problem,</p></li>
+<li><p>This dataset is already a binary classification problem</p></li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb106"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>spamCsv_yes <span class="ot">&lt;-</span> spamCsv <span class="sc">|&gt;</span></span>
 <span id="cb106-2"><a href="#cb106-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">yesno =</span> <span class="fu">factor</span>(spamCsv<span class="sc">$</span>yesno <span class="sc">==</span> <span class="st">"y"</span>,</span>
@@ -2114,7 +2177,7 @@ Tuning parameter 'cp' was held constant at a value of 0.01</code></pre>
 <p><img src="hw-03_files/figure-html/unnamed-chunk-66-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>Creating test and training data. Using a 50/50 split to make sure that the test set has some samples of the rare reptile class.</p>
+<p>Creating test and training data. Using a 50/50 split to make sure that the test set has some samples of the yes and no classes in them</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb110"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
 <span id="cb110-2"><a href="#cb110-2" aria-hidden="true" tabindex="-1"></a>nTrain <span class="ot">&lt;-</span> <span class="fu">createDataPartition</span>(<span class="at">y =</span> spamCsv_yes<span class="sc">$</span>yesno, <span class="at">p =</span> .<span class="dv">5</span>, <span class="at">list =</span> <span class="cn">FALSE</span>)</span>
@@ -2160,6 +2223,7 @@ The final value used for the model was cp = 0.01068229.</code></pre>
 <p><img src="hw-03_files/figure-html/unnamed-chunk-70-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>The tree does not predict everything as spam instead there is a condition where it has spam and not_spam.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb115"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(<span class="at">data =</span> <span class="fu">predict</span>(fit, testing_yes),</span>
 <span id="cb115-2"><a href="#cb115-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">ref =</span> testing_yes<span class="sc">$</span>yesno, <span class="at">positive =</span> <span class="st">"Spam"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -2193,9 +2257,13 @@ Prediction Spam Not_Spam
                                           </code></pre>
 </div>
 </div>
+<ul>
+<li>Accuracy is decent and kappa aslo has manageable value, the no-information rate is lower than the accuracy this means that model is good. since we are dealing iwth imbalance , we have good score of sensitivity, the chance to identify positive examples.</li>
+</ul>
 </section>
 <section id="option-2-balance-data-with-resampling" class="level2">
 <h2 class="anchored" data-anchor-id="option-2-balance-data-with-resampling">Option 2: Balance data with Resampling</h2>
+<p>We use stratified sampling with replacement (to oversample the minority/positive class). You could also use SMOTE (in package&nbsp;<strong>DMwR</strong>) or other sampling strategies (e.g., from package&nbsp;<strong>unbalanced</strong>). We use 50+50 observations here (<strong>Note:</strong>&nbsp;many samples will be chosen several times).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb117"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sampling)</span>
 <span id="cb117-2"><a href="#cb117-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1000</span>) <span class="co"># for repeatability</span></span>
@@ -2280,6 +2348,10 @@ Prediction Spam Not_Spam
                                           </code></pre>
 </div>
 </div>
+<ul>
+<li>With re sampling the accuracy has decreased and the value of kappa also decreased with the decrease in sensitivity, with imbalanced dataset we want the sensitivity to increase, therefore this method is not suitable compared to the one we did before.</li>
+</ul>
+<p>There is a tradeoff between sensitivity and specificity (how many of the identified animals are really reptiles) The tradeoff can be controlled using the sample proportions. We can sample more Spam to increase sensitivity at the cost of lower specificity.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb124"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">strata</span>(training_yes, <span class="at">stratanames =</span> <span class="st">"yesno"</span>, <span class="at">size =</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">100</span>), <span class="at">method =</span> <span class="st">"srswr"</span>)</span>
 <span id="cb124-2"><a href="#cb124-2" aria-hidden="true" tabindex="-1"></a>training_yes_balanced <span class="ot">&lt;-</span> training_yes <span class="sc">|&gt;</span> </span>
@@ -2331,9 +2403,13 @@ Prediction Spam Not_Spam
                                           </code></pre>
 </div>
 </div>
+<ul>
+<li>We can see that Sensitivity, Accuracy and the kappa has increased with a small reduction in specificity .</li>
+</ul>
 </section>
 <section id="option-3-build-a-larger-tree-and-use-predicted-probabilities" class="level2">
 <h2 class="anchored" data-anchor-id="option-3-build-a-larger-tree-and-use-predicted-probabilities">Option 3 : Build a larger tree and use Predicted Probabilities</h2>
+<p>Increase in complexity and require less data, tries to improve accuracy .</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb128"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> training_yes <span class="sc">|&gt;</span> </span>
 <span id="cb128-2"><a href="#cb128-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">train</span>(yesno <span class="sc">~</span> .,</span>
@@ -2468,9 +2544,13 @@ Prediction Spam Not_Spam
                                           </code></pre>
 </div>
 </div>
+<ul>
+<li>The Accuracy is very low, model is very bad. This maybe because the data is very large, so the complexity is also very larger compared, This plays a major role in assessing the accuracy.</li>
+</ul>
 </section>
 <section id="plot-the-roc-curve" class="level2">
 <h2 class="anchored" data-anchor-id="plot-the-roc-curve">Plot the ROC curve</h2>
+<p>Since it is a binary classification problem, the area under the curve represents a single number for how well the classifier works (Closer to one is better)</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb139"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"pROC"</span>)</span>
 <span id="cb139-2"><a href="#cb139-2" aria-hidden="true" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="fu">roc</span>(testing_yes<span class="sc">$</span>yesno <span class="sc">==</span> <span class="st">"Spam"</span>, prob[,<span class="st">"Spam"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -2498,9 +2578,15 @@ Area under the curve: 0.9041</code></pre>
 <p><img src="hw-03_files/figure-html/unnamed-chunk-86-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>The line has a trend starts to get closer to 1 and at the end touches 1.</li>
+</ul>
 </section>
 <section id="option-4-use-a-cost---sensitive-classifier" class="level2">
 <h2 class="anchored" data-anchor-id="option-4-use-a-cost---sensitive-classifier">Option 4: Use a Cost - Sensitive Classifier</h2>
+<p>The implementation of CART in <code>rpart</code> can use a cost matrix for making splitting decisions (as parameter <code>loss</code>). The matrix has the form</p>
+<p>TP FP FN TN</p>
+<p>TP and TN have to be 0. We make FN very expensive (100).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb145"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a>cost <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
 <span id="cb145-2"><a href="#cb145-2" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>, <span class="dv">1</span>,</span>
@@ -2583,6 +2669,14 @@ Prediction Spam Not_Spam
                                          </code></pre>
 </div>
 </div>
+<ul>
+<li>The accuracy of the model is not good , it is bad. The no-information rate is lower than the accuracy , kappa has a very bad value, The sensitivity and specificity trade off is also very bad. (True positive examples is very low i this method)</li>
+</ul>
+<section id="question" class="level3">
+<h3 class="anchored" data-anchor-id="question">Question:</h3>
+<p>Based on the frequency of certain keywords and symbols in an email, can we classify the email as ‘spam’ or ‘not spam’?</p>
+<p>Yes, according to the data analysis and model analysis completed above , we can say that we can classify the eamil as “Spam” and “Not_spam” based on the repetition of certain keywords and symbols</p>
+</section>
 </section>
 </section>
 <section id="classification-alternative-techniques" class="level1">
@@ -2625,6 +2719,12 @@ Prediction Spam Not_Spam
 <h1>Introduction</h1>
 <section id="training-and-testing-data" class="level2">
 <h2 class="anchored" data-anchor-id="training-and-testing-data">Training and Testing data</h2>
+</section>
+<section id="spam-e-mail-dataset-1" class="level2">
+<h2 class="anchored" data-anchor-id="spam-e-mail-dataset-1">Spam E-mail Dataset</h2>
+<p>I am using the spam e-mail dataset which either requires the tidytuesdayR package or we can read it directly from the github.</p>
+<p>The E-mail Spam dataset conatins 4601 rows of information mostly numerical except the last column.</p>
+<p>The Spam E-mail Dataset contains 7 columns (crl.tot , dollar , bang , money , n000 , make , yesno) in this the first 6 columns represent the feature vector <strong>x</strong> and the last column is the class label <strong>y.</strong> We will convert the dataframe into tidyverse tibble else a normal table.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb155"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1" aria-hidden="true" tabindex="-1"></a><span class="co"># We will use the email spam dataset as used earlier</span></span>
 <span id="cb155-2"><a href="#cb155-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -2696,6 +2796,10 @@ Accuracy was used to select the optimal model using the largest value.
 The final value used for the model was mincriterion = 0.01.</code></pre>
 </div>
 </div>
+<ul>
+<li><p>As we can see that accuracy for the model is high and Kappa value is also high</p></li>
+<li><p>Since it is fitted on train data we will not know how it works on new data (Test data)</p></li>
+</ul>
 <p>The Plot looks like a mess because there is a lot of features and data involved</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb162"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb162-1"><a href="#cb162-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ctreeFit<span class="sc">$</span>finalModel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -2703,6 +2807,10 @@ The final value used for the model was mincriterion = 0.01.</code></pre>
 <p><img src="hw-03_files/figure-html/unnamed-chunk-99-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li><p>The best parameters tuned for the model is used in the above figure.</p></li>
+<li><p>This is the result of overplotting.</p></li>
+</ul>
 </section>
 <section id="c-4.5-decision-tree" class="level2">
 <h2 class="anchored" data-anchor-id="c-4.5-decision-tree">C 4.5 Decision Tree</h2>
@@ -2758,6 +2866,10 @@ Accuracy was used to select the optimal model using the largest value.
 The final values used for the model were C = 0.378 and M = 1.</code></pre>
 </div>
 </div>
+<ul>
+<li><p>C = 0.378 , M=1 ,Accuracy = 0.891 ,Kappa = 0.764</p></li>
+<li><p>The accuracy for this model is again high and the Kappa is also relativly high and performs better than Conditional Inference tree.</p></li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb166"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb166-1"><a href="#cb166-1" aria-hidden="true" tabindex="-1"></a>C45Fit<span class="sc">$</span>finalModel</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -2886,6 +2998,9 @@ Number of Leaves  :     59
 Size of the tree :  117</code></pre>
 </div>
 </div>
+<ul>
+<li>The J48 pruned tree is shown above, there are 117 brains and 59 main nodes to the tree.</li>
+</ul>
 </section>
 <section id="k-nearest-neighbors" class="level2">
 <h2 class="anchored" data-anchor-id="k-nearest-neighbors">K-Nearest Neighbors</h2>
@@ -2926,6 +3041,10 @@ Accuracy was used to select the optimal model using the largest value.
 The final value used for the model was k = 1.</code></pre>
 </div>
 </div>
+<ul>
+<li><p>The K- nearest Neighbor has better accuracy and kappa score than the decision tree.</p></li>
+<li><p>it is the best model based on the training data , and might be overfitting, because it might perform bad on the test data</p></li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb170"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb170-1"><a href="#cb170-1" aria-hidden="true" tabindex="-1"></a>knnFit<span class="sc">$</span>finalModel</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -2936,6 +3055,9 @@ Training set outcome distribution:
 2231 1451 </code></pre>
 </div>
 </div>
+<ul>
+<li>The above out come distribution shows the prediction of class “y” and “n”</li>
+</ul>
 </section>
 <section id="part-rule-based-classifier" class="level2">
 <h2 class="anchored" data-anchor-id="part-rule-based-classifier">PART (Rule-based classifier)</h2>
@@ -2974,6 +3096,10 @@ Accuracy was used to select the optimal model using the largest value.
 The final values used for the model were threshold = 0.133 and pruned = yes.</code></pre>
 </div>
 </div>
+<ul>
+<li><p>The above inference for PART gives a high accuracy and kappa score but is bad compared to the knn - classifier.</p></li>
+<li><p>It might not be overfitting on the data and might perform well on the testing data.</p></li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb174"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb174-1"><a href="#cb174-1" aria-hidden="true" tabindex="-1"></a>rulesFit<span class="sc">$</span>finalModel</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -3039,6 +3165,9 @@ crl.tot &lt;= 368: y (10.0/2.0)
 Number of Rules  :  15</code></pre>
 </div>
 </div>
+<ul>
+<li>The above inference shows the rules about the algorithm works on this training data.</li>
+</ul>
 </section>
 <section id="linear-support-vector-machines" class="level2">
 <h2 class="anchored" data-anchor-id="linear-support-vector-machines">Linear Support Vector Machines</h2>
@@ -3083,6 +3212,10 @@ Objective Function Value : -1509
 Training error : 0.156437 </code></pre>
 </div>
 </div>
+<ul>
+<li><p>Compared to knn the best classifier for this data until now, the accuracy is moderate, not good nor bad, the kappa score is very low compared to the knn classifier, the kappa score indicates the agreement between imbalanced categories in the dataset in terms to calculate the accuracy.</p></li>
+<li><p>This kappa score means there is moderate agreement that the class variable is somewhat distributed in the dataset</p></li>
+</ul>
 </section>
 <section id="random-forest" class="level2">
 <h2 class="anchored" data-anchor-id="random-forest">Random Forest</h2>
@@ -3133,6 +3266,9 @@ n 2050  181      0.0811
 y  279 1172      0.1923</code></pre>
 </div>
 </div>
+<ul>
+<li>The accuracy is better than the knn classifier, which makes it more prone to overfitting, the accuracy is very high and the kappa value means that there is near perfect agreement of the target variable distribution</li>
+</ul>
 </section>
 <section id="gradient-boosted-decision-trees-xgboost" class="level2">
 <h2 class="anchored" data-anchor-id="gradient-boosted-decision-trees-xgboost">Gradient Boosted Decision Trees (xgboost)</h2>
@@ -3174,6 +3310,11 @@ Tuning parameter 'subsample' was held
  constant at a value of 0.5</code></pre>
 </div>
 </div>
+<ul>
+<li><p>Accuracy of the model is comparatively low than the best classifier (random forest) until now.</p></li>
+<li><p>The model is mediocre and does not perform well as the other models we have seen until now.</p></li>
+<li><p>The reason I am just reffering any model as not good compared to the best model is because the we are only inferring on the training data, so i compare them to the best accuracy and kappa score.</p></li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb186"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb186-1"><a href="#cb186-1" aria-hidden="true" tabindex="-1"></a>xgboostFit<span class="sc">$</span>finalModel</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -3256,6 +3397,9 @@ Accuracy was used to select the optimal model using the largest value.
 The final values used for the model were size = 9 and decay = 0.</code></pre>
 </div>
 </div>
+<ul>
+<li>The Accuracy for neural network is also mediocre when compared to the best model random forest classifier and the kappa score is also in moderate agreement.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb190"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb190-1"><a href="#cb190-1" aria-hidden="true" tabindex="-1"></a>nnetFit<span class="sc">$</span>finalModel</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -3327,6 +3471,10 @@ xgboost      0.641   0.722  0.737 0.738   0.753 0.815    0
 NeuralNet    0.609   0.737  0.752 0.743   0.777 0.804    0</code></pre>
 </div>
 </div>
+<ul>
+<li><p>We can clearly see the Random Forest is the best model for classification, next to it is the K- Nearest Neighbor, all other models perform bad when compared to these models in terms of accuracy.</p></li>
+<li><p>Kappa score is relatively close for knn and random forest, but still random forest has the better scores and this means it is in near perfect agreement.</p></li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb196"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb196-1"><a href="#cb196-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lattice)</span>
 <span id="cb196-2"><a href="#cb196-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bwplot</span>(resamps, <span class="at">layout =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3334,6 +3482,8 @@ NeuralNet    0.609   0.737  0.752 0.743   0.777 0.804    0</code></pre>
 <p><img src="hw-03_files/figure-html/unnamed-chunk-117-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>The Box - plot shows that random forest performed better in all ten folds and knn is the closest to it.</p>
+<p>This means that the inference on the testing data might be similar for the both, not much of a difference in the predictions.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb197"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb197-1"><a href="#cb197-1" aria-hidden="true" tabindex="-1"></a>difs <span class="ot">&lt;-</span> <span class="fu">diff</span>(resamps)</span>
 <span id="cb197-2"><a href="#cb197-2" aria-hidden="true" tabindex="-1"></a>difs </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3400,10 +3550,13 @@ xgboost      -0.00469
 NeuralNet             </code></pre>
 </div>
 </div>
+<ul>
+<li>This shows that there is a huge difference in the model, all model perform decent, but ctree in the first row shows has a negative value, it can rejected since it has &lt;0.05 value by null hypothesis.</li>
+</ul>
 </section>
 <section id="applying-the-chosen-model-to-the-test-data" class="level2">
 <h2 class="anchored" data-anchor-id="applying-the-chosen-model-to-the-test-data">Applying the chosen model to the Test data</h2>
-<p>Most of the model do well on the train data, here we choose random forest model, since it has performed better than any other on the train data.</p>
+<p>Most of the model do well on the train data, here we choose random forest model, since it has performed better than any other on the train data and hope it does good on the testing data as well.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb201"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb201-1"><a href="#cb201-1" aria-hidden="true" tabindex="-1"></a>pr <span class="ot">&lt;-</span> <span class="fu">predict</span>(randomForestFit, SpamCsv_test)</span>
 <span id="cb201-2"><a href="#cb201-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -3469,6 +3622,12 @@ Prediction   n   y
                                         </code></pre>
 </div>
 </div>
+<ul>
+<li><p>The accuracy on the best model from training data which is random forest classifier performs good on the testing data as well.</p></li>
+<li><p>This means it does not overfit on the testing data.</p></li>
+<li><p>Maybe if we tweak the hyperparameters of the random forest model a bit, it might perform even better, or randomize the data for training.</p></li>
+<li><p>We can also choose a another model like knn to see the inference.</p></li>
+</ul>
 </section>
 <section id="comparing-decision-boundaries-of-popular-classification-techniques." class="level2">
 <h2 class="anchored" data-anchor-id="comparing-decision-boundaries-of-popular-classification-techniques.">Comparing Decision Boundaries of Popular Classification Techniques.</h2>
@@ -3587,6 +3746,9 @@ Prediction   n   y
 <p><img src="hw-03_files/figure-html/unnamed-chunk-124-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>In the above plot we can see that there 3 classes and there are some points which is outside those 3 classes =, we can call them outlier as they wont affect the prediction in any way. We can remove them using some techniques ised in statistics.</li>
+</ul>
 </section>
 <section id="k-nearest-neighbors-classifier" class="level2">
 <h2 class="anchored" data-anchor-id="k-nearest-neighbors-classifier">K-Nearest Neighbors Classifier</h2>
@@ -3602,6 +3764,9 @@ Prediction   n   y
 <p><img src="hw-03_files/figure-html/unnamed-chunk-125-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>at k = 1 the training accuracy is one, this means it has predicted the classes perfectly, but we can see that the areas are over lapping each other</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb210"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb210-1"><a href="#cb210-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> caret<span class="sc">::</span><span class="fu">knn3</span>(species <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">k =</span> <span class="dv">3</span>)</span>
 <span id="cb210-2"><a href="#cb210-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"species"</span>) <span class="sc">+</span> </span>
@@ -3614,6 +3779,9 @@ Prediction   n   y
 <p><img src="hw-03_files/figure-html/unnamed-chunk-126-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>The white areas the common points or the spots are in the same place .</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb211"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb211-1"><a href="#cb211-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> caret<span class="sc">::</span><span class="fu">knn3</span>(species <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">k =</span> <span class="dv">9</span>)</span>
 <span id="cb211-2"><a href="#cb211-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"species"</span>) <span class="sc">+</span> </span>
@@ -3626,6 +3794,9 @@ Prediction   n   y
 <p><img src="hw-03_files/figure-html/unnamed-chunk-127-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>As k = 9 which is increased the boundary get smooth and we get a clear picture of the boundaries, it fits better than k = 1</li>
+</ul>
 </section>
 <section id="naive-bayes-classifier" class="level2">
 <h2 class="anchored" data-anchor-id="naive-bayes-classifier">Naive bayes Classifier</h2>
@@ -3642,6 +3813,9 @@ Prediction   n   y
 <p><img src="hw-03_files/figure-html/unnamed-chunk-128-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>Naive bayes relies on probability, it has also done a good job in diving the boundaries for different classes.</li>
+</ul>
 </section>
 <section id="linear-discriminant-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="linear-discriminant-analysis">Linear Discriminant Analysis</h2>
@@ -3674,8 +3848,6 @@ iter  60 value 23.894251
 final  value 23.892065 
 converged</code></pre>
 </div>
-</div>
-<div class="cell">
 <div class="sourceCode cell-code" id="cb216"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb216-1"><a href="#cb216-1" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"species"</span>) <span class="sc">+</span> </span>
 <span id="cb216-2"><a href="#cb216-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Multinomial Logistic Regression"</span>,</span>
 <span id="cb216-3"><a href="#cb216-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Bill length (mm)"</span>,</span>
@@ -3683,9 +3855,12 @@ converged</code></pre>
 <span id="cb216-5"><a href="#cb216-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Species"</span>,</span>
 <span id="cb216-6"><a href="#cb216-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-131-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-130-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>We can the prediction of the boundaries for multinomial is different than the LDA and has more accuracy, but not that significant.</li>
+</ul>
 </section>
 <section id="decision-trees-1" class="level2">
 <h2 class="anchored" data-anchor-id="decision-trees-1">Decision trees</h2>
@@ -3698,7 +3873,7 @@ converged</code></pre>
 <span id="cb217-6"><a href="#cb217-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Species"</span>,</span>
 <span id="cb217-7"><a href="#cb217-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-132-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-131-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
@@ -3711,9 +3886,13 @@ converged</code></pre>
 <span id="cb218-7"><a href="#cb218-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Species"</span>,</span>
 <span id="cb218-8"><a href="#cb218-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-133-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-132-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li><p>Training accuracy of overfitting is higher because an higher order complexity is introduced to over fit the data.</p></li>
+<li><p>THe pink space int the plot shows the common point for 3 classes.</p></li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb219"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb219-1"><a href="#cb219-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> C50<span class="sc">::</span><span class="fu">C5.0</span>(species <span class="sc">~</span> ., <span class="at">data =</span> _)</span>
 <span id="cb219-2"><a href="#cb219-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"species"</span>) <span class="sc">+</span> </span>
@@ -3723,9 +3902,13 @@ converged</code></pre>
 <span id="cb219-6"><a href="#cb219-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Species"</span>,</span>
 <span id="cb219-7"><a href="#cb219-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-134-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-133-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li><p>The lighter green is still chinstrap but the prediction is not that confident because it is near the boundary.</p></li>
+<li><p>The accuray is very high</p></li>
+</ul>
 </section>
 <section id="random-forest-1" class="level2">
 <h2 class="anchored" data-anchor-id="random-forest-1">Random Forest</h2>
@@ -3738,9 +3921,13 @@ converged</code></pre>
 <span id="cb220-6"><a href="#cb220-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Species"</span>,</span>
 <span id="cb220-7"><a href="#cb220-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-135-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-134-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li><p>Random forest has performed good with the dataset, 100% it has perfect predictions.</p></li>
+<li><p>By looking at the boundary, how curvy it is, we can see it has better boundaries for the classes.</p></li>
+</ul>
 </section>
 <section id="svm" class="level2">
 <h2 class="anchored" data-anchor-id="svm">SVM</h2>
@@ -3753,9 +3940,12 @@ converged</code></pre>
 <span id="cb221-6"><a href="#cb221-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Species"</span>,</span>
 <span id="cb221-7"><a href="#cb221-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-136-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-135-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>Linear kernel has straight lines as the boundaries with no curve .</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb222"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb222-1"><a href="#cb222-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> e1071<span class="sc">::</span><span class="fu">svm</span>(species <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">kernel =</span> <span class="st">"radial"</span>)</span>
 <span id="cb222-2"><a href="#cb222-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"species"</span>) <span class="sc">+</span> </span>
@@ -3765,9 +3955,12 @@ converged</code></pre>
 <span id="cb222-6"><a href="#cb222-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Species"</span>,</span>
 <span id="cb222-7"><a href="#cb222-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-137-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-136-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>Radial kernel has some sort curve in them, it leans towards the point in the boundaries to assume its shape.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb223"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb223-1"><a href="#cb223-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> e1071<span class="sc">::</span><span class="fu">svm</span>(species <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">kernel =</span> <span class="st">"polynomial"</span>)</span>
 <span id="cb223-2"><a href="#cb223-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"species"</span>) <span class="sc">+</span> </span>
@@ -3777,9 +3970,12 @@ converged</code></pre>
 <span id="cb223-6"><a href="#cb223-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Species"</span>,</span>
 <span id="cb223-7"><a href="#cb223-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-138-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-137-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>It increases its complexity of the model to bring a better prediction, but this has lower accuracy compared to the other SVM’s.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb224"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb224-1"><a href="#cb224-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> e1071<span class="sc">::</span><span class="fu">svm</span>(species <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">kernel =</span> <span class="st">"sigmoid"</span>)</span>
 <span id="cb224-2"><a href="#cb224-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"species"</span>) <span class="sc">+</span> </span>
@@ -3789,9 +3985,12 @@ converged</code></pre>
 <span id="cb224-6"><a href="#cb224-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Species"</span>,</span>
 <span id="cb224-7"><a href="#cb224-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-139-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-138-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>The Sigmoid kernel divides it s boundaries similar to the sin graph.</li>
+</ul>
 </section>
 <section id="single-layered-feed-forward-neural-network" class="level2">
 <h2 class="anchored" data-anchor-id="single-layered-feed-forward-neural-network">Single Layered Feed Forward Neural Network</h2>
@@ -3810,7 +4009,7 @@ Caused by error in `if (zero_range(range)) ...`:
 ! missing value where TRUE/FALSE needed</code></pre>
 </div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-140-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-139-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
@@ -3828,9 +4027,12 @@ Caused by error in `if (zero_range(range)) ...`:
 ! missing value where TRUE/FALSE needed</code></pre>
 </div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-141-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-140-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>Increasing the neuron increased the accuracy , the boundaries look like a linear line with some deviation.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb229"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb229-1"><a href="#cb229-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span>x <span class="sc">|&gt;</span> nnet<span class="sc">::</span><span class="fu">nnet</span>(species <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">size =</span> <span class="dv">4</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb229-2"><a href="#cb229-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var  =</span> <span class="st">"species"</span>, </span>
@@ -3841,9 +4043,12 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb229-7"><a href="#cb229-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Species"</span>,</span>
 <span id="cb229-8"><a href="#cb229-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-142-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-141-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>again Increasing the neuron again increased the accuracy, has defined a better boundary for the classes</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb230"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb230-1"><a href="#cb230-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span>x <span class="sc">|&gt;</span> nnet<span class="sc">::</span><span class="fu">nnet</span>(species <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">size =</span> <span class="dv">10</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb230-2"><a href="#cb230-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var  =</span> <span class="st">"species"</span>, </span>
@@ -3854,13 +4059,17 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb230-7"><a href="#cb230-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Species"</span>,</span>
 <span id="cb230-8"><a href="#cb230-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-143-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-142-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li><p>10 neurons defines even better boundary showing common points(white area).</p></li>
+<li><p>Comparatively better performance.</p></li>
+</ul>
 </section>
 <section id="circle-dataset" class="level2">
 <h2 class="anchored" data-anchor-id="circle-dataset">Circle Dataset</h2>
-<p>This dataset is not linearly seperable</p>
+<p>This dataset is not linearly separable</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb231"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb231-1"><a href="#cb231-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1000</span>)</span>
 <span id="cb231-2"><a href="#cb231-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -3894,7 +4103,7 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb233-2"><a href="#cb233-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
 <span id="cb233-3"><a href="#cb233-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-145-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-144-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -3907,9 +4116,12 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb234-4"><a href="#cb234-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb234-5"><a href="#cb234-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-146-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-145-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>Again proves to be a better classifier compared to other models, But the k = 1 has no definition in the boundary for the points lying on the boundary.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb235"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb235-1"><a href="#cb235-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> caret<span class="sc">::</span><span class="fu">knn3</span>(class <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">k =</span> <span class="dv">10</span>)</span>
 <span id="cb235-2"><a href="#cb235-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"class"</span>) <span class="sc">+</span> </span>
@@ -3917,9 +4129,12 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb235-4"><a href="#cb235-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb235-5"><a href="#cb235-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-147-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-146-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>Has a better boundary definition than the k = 1. Clearly has defined two boundaries</li>
+</ul>
 </section>
 <section id="naive-bayes-classifier-1" class="level2">
 <h2 class="anchored" data-anchor-id="naive-bayes-classifier-1">Naive Bayes Classifier</h2>
@@ -3931,9 +4146,12 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb236-5"><a href="#cb236-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb236-6"><a href="#cb236-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-148-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-147-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>This model has low confidence level of predicting the class as we can see the faded red for the prediction of a class.</li>
+</ul>
 </section>
 <section id="linear-discriminant-analysis-lda" class="level2">
 <h2 class="anchored" data-anchor-id="linear-discriminant-analysis-lda">Linear Discriminant Analysis (LDA)</h2>
@@ -3944,9 +4162,12 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb237-4"><a href="#cb237-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb237-5"><a href="#cb237-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-149-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-148-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>has a boundary line for the the classes, but as we can see again this model has no confidence in prediction as we can more white space than the predicition of classes</li>
+</ul>
 </section>
 <section id="logistic-regression" class="level2">
 <h2 class="anchored" data-anchor-id="logistic-regression">Logistic Regression</h2>
@@ -3964,9 +4185,12 @@ converged</code></pre>
 <span id="cb240-3"><a href="#cb240-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb240-4"><a href="#cb240-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-150-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-149-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>H class 2 is found abundant. but the predictions are wrong, the accuracy is very low, this is a circle dataset, but a linear line is separating as boundaries.</li>
+</ul>
 </section>
 <section id="decision-trees-2" class="level2">
 <h2 class="anchored" data-anchor-id="decision-trees-2">Decision Trees</h2>
@@ -3977,9 +4201,12 @@ converged</code></pre>
 <span id="cb241-4"><a href="#cb241-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb241-5"><a href="#cb241-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-151-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-150-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>Has a bit of less definition for the boundary as it is not smooth.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb242"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb242-1"><a href="#cb242-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> rpart<span class="sc">::</span><span class="fu">rpart</span>(class <span class="sc">~</span> ., <span class="at">data =</span> _,</span>
 <span id="cb242-2"><a href="#cb242-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="fl">0.001</span>, <span class="at">minsplit =</span> <span class="dv">1</span>))</span>
@@ -3988,9 +4215,12 @@ converged</code></pre>
 <span id="cb242-5"><a href="#cb242-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb242-6"><a href="#cb242-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-152-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-151-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>Overfitting ensures it has a prediction, and the boundary has well defined shape for the points lying at the boundary line.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb243"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb243-1"><a href="#cb243-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> C50<span class="sc">::</span><span class="fu">C5.0</span>(class <span class="sc">~</span> ., <span class="at">data =</span> _)</span>
 <span id="cb243-2"><a href="#cb243-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"class"</span>) <span class="sc">+</span> </span>
@@ -3998,9 +4228,12 @@ converged</code></pre>
 <span id="cb243-4"><a href="#cb243-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb243-5"><a href="#cb243-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-153-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-152-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>CS 50 has a similar boundary to CART, but the prediction of classes vary.</li>
+</ul>
 </section>
 <section id="random-forest-2" class="level2">
 <h2 class="anchored" data-anchor-id="random-forest-2">Random Forest</h2>
@@ -4012,9 +4245,12 @@ converged</code></pre>
 <span id="cb244-5"><a href="#cb244-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb244-6"><a href="#cb244-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-154-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-153-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>Boundaries are well defined with white spaces indicating common points, with a high accuracy of 100!% perfect prediction of classes.</li>
+</ul>
 </section>
 <section id="svm-1" class="level2">
 <h2 class="anchored" data-anchor-id="svm-1">SVM</h2>
@@ -4030,9 +4266,12 @@ Caused by error in `if (zero_range(range)) ...`:
 ! missing value where TRUE/FALSE needed</code></pre>
 </div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-155-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-154-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>The Linear kernel predicts every prediction as class 2. it is a bad model.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb247"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb247-1"><a href="#cb247-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> e1071<span class="sc">::</span><span class="fu">svm</span>(class <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">kernel =</span> <span class="st">"radial"</span>)</span>
 <span id="cb247-2"><a href="#cb247-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"class"</span>) <span class="sc">+</span> </span>
@@ -4040,9 +4279,12 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb247-4"><a href="#cb247-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb247-5"><a href="#cb247-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-156-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-155-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>Compared to linear kernel radial kernel performs way better with a high accuracy.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb248"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb248-1"><a href="#cb248-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> e1071<span class="sc">::</span><span class="fu">svm</span>(class <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">kernel =</span> <span class="st">"polynomial"</span>)</span>
 <span id="cb248-2"><a href="#cb248-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"class"</span>) <span class="sc">+</span> </span>
@@ -4050,9 +4292,12 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb248-4"><a href="#cb248-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb248-5"><a href="#cb248-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-157-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-156-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>The polynomial kernel perform bad on circle dataset, as it gives curves in the boundaries but not completes as a circle and so it has a low accuracy.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb249"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb249-1"><a href="#cb249-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> e1071<span class="sc">::</span><span class="fu">svm</span>(class <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">kernel =</span> <span class="st">"sigmoid"</span>)</span>
 <span id="cb249-2"><a href="#cb249-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"class"</span>) <span class="sc">+</span> </span>
@@ -4060,9 +4305,12 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb249-4"><a href="#cb249-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb249-5"><a href="#cb249-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-158-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-157-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>It is similar to the polynomial kernel, perform very bad on circle datasets.</li>
+</ul>
 </section>
 <section id="single-layered-feed-forward-neural-network-1" class="level2">
 <h2 class="anchored" data-anchor-id="single-layered-feed-forward-neural-network-1">Single Layered Feed Forward Neural Network</h2>
@@ -4074,7 +4322,7 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb250-5"><a href="#cb250-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb250-6"><a href="#cb250-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-159-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-158-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
@@ -4085,9 +4333,12 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb251-5"><a href="#cb251-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb251-6"><a href="#cb251-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-160-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-159-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>It is circle dataset, but the model has predicted a linear line to seperate, which might be wrong and has a very low accuracy.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb252"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb252-1"><a href="#cb252-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span>x <span class="sc">|&gt;</span> nnet<span class="sc">::</span><span class="fu">nnet</span>(class <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">size =</span> <span class="dv">4</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb252-2"><a href="#cb252-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"class"</span>, </span>
@@ -4096,9 +4347,12 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb252-5"><a href="#cb252-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb252-6"><a href="#cb252-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-161-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-160-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>it has a better boundary definition compared to the 1 neuron neural network, and has almost perfect accuracy.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb253"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb253-1"><a href="#cb253-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span>x <span class="sc">|&gt;</span> nnet<span class="sc">::</span><span class="fu">nnet</span>(class <span class="sc">~</span> ., <span class="at">data =</span> _, <span class="at">size =</span> <span class="dv">10</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb253-2"><a href="#cb253-2" aria-hidden="true" tabindex="-1"></a><span class="fu">decisionplot</span>(model, x, <span class="at">class_var =</span> <span class="st">"class"</span>, </span>
@@ -4107,9 +4361,13 @@ Caused by error in `if (zero_range(range)) ...`:
 <span id="cb253-5"><a href="#cb253-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">shape =</span> <span class="st">"Class"</span>,</span>
 <span id="cb253-6"><a href="#cb253-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="hw-03_files/figure-html/unnamed-chunk-162-1.png" class="img-fluid" width="672"></p>
+<p><img src="hw-03_files/figure-html/unnamed-chunk-161-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ul>
+<li>At the end we can see that increasing the number of neurons increases the definition of the boundaries. Performs better than NN 4.</li>
+</ul>
+<p>We can see that Knn , Random Forest and 10 neuron Neural Network worked better with the circle dataset.</p>
 </section>
 </section>
 
